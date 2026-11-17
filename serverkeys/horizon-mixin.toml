@@ -1,0 +1,51 @@
+# Server keys ("Клавіші сервера"): one client mod for the server's mods. It adds rebindable keys
+# in Options > Mods > Server keys, and sends each press to the server, where the mod the key
+# belongs to acts on it (no commands to type). It also draws the server's perk tree as a screen
+# of its own and carries out the client-side perks (lava vision, swimming in lava). Horizon
+# client only; a vanilla client uses the server's chest menus and Quick Actions dialog (G).
+[mod]
+id = "serverkeys"
+version = "0.9.0"
+
+# The lava swimming reaches the game's own player movement, so the mod is pinned.
+[compatibility]
+horizon_revision = "fdc87aecdbd116bf1e08adcd062fcbaea8c2e2ca"
+
+[api]
+path = "api"
+
+# Switches the trait mod sets from the server's perks, read by the movement below.
+[[module]]
+id = "flags"
+file = "crates/horizon-client/src/client_lib.rs"
+name = "serverkeys_flags"
+source = "flags.rs"
+visibility = "pub"
+
+# "Вогнестійкість" (progression): in lava the local player moves as in water.
+[[injection]]
+id = "travel"
+target = "horizon_client_lib::motion::MotionWorld<'_,'_,'_>::player_travel"
+kind = "HEAD"
+helper = "travel.rs"
+bindings = [
+  { name = "world", ty = "&mut MotionWorld<'_, '_, '_>", value = "&mut *self" },
+]
+
+# "Впевнений спуск" and "Прохідливість" (progression): the horse this player drives moves on this
+# client, by its type's gravity and step, so they are set here before each of its ticks.
+[[module]]
+id = "mount_glue"
+file = "crates/horizon-client/src/game.rs"
+name = "serverkeys_mount"
+source = "mount_glue.rs"
+
+[[injection]]
+id = "mount"
+target = "horizon_client::game::remote_vehicles::Game<'_>::drive_mount"
+kind = "HEAD"
+helper = "mount.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "i", ty = "usize", value = "i" },
+]

@@ -1,0 +1,12 @@
+[package]
+name = "mod-serverkeys"
+version = "0.1.0"
+edition = "2024"
+description = "Server keys: rebindable keys for the server's mods, sent to the server"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+horizon-client = { git = "https://github.com/horizon-rust/horizon", rev = "294448014fba585f8d5d09dd8886f482493b6417" }
+log = "0.4"
